@@ -129,8 +129,10 @@ int getop(char s[]) {
 
 
 	i = 0;
-	if (c == '-' && !isdigit(s[++i] = c = getch()))
+	if (c == '-' && !isdigit(s[++i] = c = getch())) {
 		ungetch(s[i--]);
+		return '-';
+	}
 
 	if (isdigit(c))
 		while (isdigit(s[++i] = c = getch()));
@@ -145,20 +147,24 @@ int getop(char s[]) {
 	return NUMBER;
 }
 
-char buf[BUFSIZE];
-int bufp;
+char buf = -1;
 
 int getch(void)
 {
-	return (bufp > 0) ? buf[--bufp] : getchar();
+	if (buf > 0) {
+		char c = buf;
+		buf = -1;
+		return c;
+	}
+	return getchar();
 }
 
 void ungetch(int c)
 {
-	if (bufp >= BUFSIZE)
+	if (buf > 0)
 		printf("ungetch: too many characters\n");
 	else
-		buf[bufp++] = c;
+		buf = c;
 }
 
 void ungets(char s[]) {
