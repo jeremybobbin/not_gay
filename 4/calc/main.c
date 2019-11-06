@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <ctype.h>
 
 #define MAXOP 100
@@ -50,6 +51,19 @@ int main(int argc, char * argv) {
 				break;
 			case 'p':
 				printf("\t%.8g\n", pop());
+				break;
+			case 's':
+				push(sin(pop()));
+				break;
+			case 'c':
+				push(cos(pop()));
+				break;
+			case '^':
+				op2 = pop();
+				push(pow(pop(), op2));
+				break;
+			case 'e':
+				push(exp(pop()));
 				break;
 			case 'd':
 				op2 = pop();
