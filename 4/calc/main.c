@@ -47,7 +47,14 @@ int main(int argc, char * argv) {
 					printf("error: zero divisor\n");
 				break;
 			case '\n':
+				break;
+			case 'p':
 				printf("\t%.8g\n", pop());
+				break;
+			case 'd':
+				op2 = pop();
+				push(op2);
+				push(op2);
 				break;
 			default:
 				printf("error: unknown command %s\n", s);
