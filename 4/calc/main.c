@@ -147,24 +147,31 @@ int getop(char s[]) {
 	return NUMBER;
 }
 
-char buf = -1;
+char buf[BUFSIZE];
+int bufp = 0;
+char eofs[BUFSIZE]; /* EOF offsets; stack of offsets */
+int eofsp; /* EOF pointer */
 
 int getch(void)
 {
-	if (buf > 0) {
-		char c = buf;
-		buf = -1;
-		return c;
+	if (eofs[eofsp]-- == 0) {
+		eofsp--;
+		return EOF;
 	}
-	return getchar();
+
+	return (bufp > 0) ? buf[--bufp] : getchar();
 }
 
 void ungetch(int c)
 {
-	if (buf > 0)
+	if (bufp >= BUFSIZE)
 		printf("ungetch: too many characters\n");
-	else
-		buf = c;
+	else if (c == EOF)
+		eofs[++eofsp] = 0;
+	else {
+		eofs[eofsp]++;
+		buf[bufp++] = c;
+	}
 }
 
 void ungets(char s[]) {
