@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include <ctype.h>
+#include <limits.h>
 
 #define MAXOP 100
 #define NUMBER '0'
+#define REGISTER '1'
 #define BUFSIZE 100
 
 int getop(char[]);
@@ -17,6 +19,8 @@ int main(int argc, char * argv) {
 	int type;
 	double op2;
 	char s[MAXOP];
+	double r[26]; /* register */
+	char lr; /* last register */
 
 	while ((type = getop(s)) != EOF) {
 		switch (type) {
@@ -50,7 +54,7 @@ int main(int argc, char * argv) {
 			case '\n':
 				break;
 			case 'p':
-				printf("\t%.8g\n", pop());
+				printf("\t%.8g\n", r['P'] = pop());
 				break;
 			case 's':
 				push(sin(pop()));
@@ -65,12 +69,23 @@ int main(int argc, char * argv) {
 			case 'e':
 				push(exp(pop()));
 				break;
+			case 'r': /* register */
+				pop(); /* results in actual value of the selected register
+					  we can ignore because 'lr' has what we want.
+				*/
+				r[(int) lr] = pop();
+				break;
 			case 'd':
 				op2 = pop();
 				push(op2);
 				push(op2);
 				break;
 			default:
+				if (type >= 'A' && type <= 'Z') {
+					lr = type;
+					push(r[type]);
+					break;
+				}
 				printf("error: unknown command %s\n", s);
 				break;
 		}
@@ -105,6 +120,7 @@ int getop(char s[]) {
 
 	while ((s[0] = c = getch()) == ' ' || c == '\t');
 	s[1] = '\0';
+
 	if (!isdigit(c) && c != '.' && c != '-')
 		return c;
 
