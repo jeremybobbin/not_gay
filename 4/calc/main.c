@@ -22,6 +22,9 @@ int main(int argc, char * argv) {
 	double r[26]; /* register */
 	char lr; /* last register */
 
+	for (int i = 0; i < 26; i++)
+		r[i] = 0;
+
 	while ((type = getop(s)) != EOF) {
 		switch (type) {
 			case NUMBER:
@@ -82,8 +85,8 @@ int main(int argc, char * argv) {
 				break;
 			default:
 				if (type >= 'A' && type <= 'Z') {
-					lr = type;
-					push(r[type]);
+					lr = type - 'A';
+					push(r[lr]);
 					break;
 				}
 				printf("error: unknown command %s\n", s);
@@ -158,3 +161,9 @@ void ungetch(int c)
 		buf[bufp++] = c;
 }
 
+void ungets(char s[]) {
+	char c;
+	int i;
+	for (c = s[i = 0]; c != '\0'; c = s[i++])
+		ungetch(s[i]);
+}
