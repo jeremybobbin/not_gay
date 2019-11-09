@@ -83,6 +83,8 @@ int main(int argc, char * argv) {
 				push(op2);
 				push(op2);
 				break;
+			case '\0':
+				break;
 			default:
 				if (type >= 'A' && type <= 'Z') {
 					lr = type - 'A';
@@ -147,32 +149,70 @@ int getop(char s[]) {
 	return NUMBER;
 }
 
+int get_line(char s[], int n)
+{
+	int i;
+	char c;
+	for (i = 0; i < n - 1 && (c = getchar()) != EOF && c != '\n'; i++)
+		s[i] = c;
+
+	if (c == '\n')
+		s[++i] = '\n';
+
+	s[i] = '\0';
+
+	return i;
+
+}
+
+
+int strlen(char s[]) {
+	int i;
+	for (i = 0; s[i] != '\0'; i++);
+	return i + 1;
+}
+
+int strrev(char s[]) 
+{
+	int i, j;
+	char c;
+	for (i = 0, j = strlen(s) - 1; i < j; i++, j--) {
+		c = s[i];
+		s[i] = s[j];
+		s[j] = c;
+	}
+	return 0;
+}
+
+
 char buf[BUFSIZE];
+int buflen = 0;
 int bufp = 0;
-char eofs[BUFSIZE]; /* EOF offsets; stack of offsets */
-int eofsp; /* EOF pointer */
 
 int getch(void)
 {
-	if (eofs[eofsp]-- == 0) {
-		eofsp--;
-		return EOF;
-	}
+	if (bufp < buflen) {
+		char c = buf[bufp++];
+		return c;
+	} else {
+		if (get_line(buf, BUFSIZE) == 0)
+			return EOF;
 
-	return (bufp > 0) ? buf[--bufp] : getchar();
+		buflen = strlen(buf);
+		bufp = 0;
+		return getch();
+	}
 }
 
 void ungetch(int c)
 {
 	if (bufp >= BUFSIZE)
 		printf("ungetch: too many characters\n");
-	else if (c == EOF)
-		eofs[++eofsp] = 0;
-	else {
-		eofs[eofsp]++;
-		buf[bufp++] = c;
-	}
+	else
+		bufp--;
 }
+
+
 
 void ungets(char s[]) {
 	char c;
