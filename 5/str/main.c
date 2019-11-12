@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 #define BUFSIZE 100
 
@@ -51,6 +50,50 @@ int strncmp(char *s, char *t, int n)
 	return *s - *t;
 }
 
+int reverse(char *s)
+{
+	char *e, c;
+	e = s;
+	while (*++e);
+	while (e > s)
+	{
+		c = *s;
+		*s = *--e;
+		*e = c;
+	}
+}
+
+int isspace(char s) 
+{
+	return s == ' ' || s == '\t' || s == '\n';
+}
+
+int isdigit(char s) 
+{
+	return s >= '0' && s <= '9';
+}
+
+int atoi(char *s)
+{
+	int sign;
+	int ret = 0;
+	char c;
+	while (isspace(*s))
+		s++;
+
+	sign = (*s == '-') ? -1 : 1;
+
+	if (*s == '-' || *s == '+')
+		s++;
+
+	while (isdigit(c = *s++))
+	{
+		ret *= 10; 
+		ret += (c - '0');
+	}
+	return ret;
+
+}
 
 
 int main(int argc, char * argv) {
@@ -81,4 +124,18 @@ int main(int argc, char * argv) {
 	
 	if (strncmp("Apple", "Pear", 2) == ('p' - 'e'))
 		printf("Strncmp!\n");
+
+	char y[] = "Jeremy";
+	reverse(y);
+	printf("%s\n", y);
+	
+	int i;
+	char j[50], c;
+	while ((c = getchar()) != EOF && c != '\n')
+		j[i++] = c;
+	j[i] = '\0';
+
+	i = atoi(j);
+
+	printf("%d\n", i);
 }
