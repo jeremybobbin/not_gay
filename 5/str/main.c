@@ -28,6 +28,31 @@ int strend(char *s, char *t)
 
 }
 
+int strncpy(char *s, char *ct, int n)
+{
+	char *end = ct + n;
+	while (ct < end && (*s++ = *ct++) != '\0');
+	return s;
+}
+
+int strncat(char *s, char *t, int n)
+{
+	char *ret = s;
+	char *end = t + n;
+	while (*++s); /* Goto '\0' */
+	while (t < end && (*s++ = *t++));
+	*s = '\0';
+	return ret;
+}
+
+int strncmp(char *s, char *t, int n)
+{
+	while (n-- > 0 && *s && *t && *s++ == *t++);
+	return *s - *t;
+}
+
+
+
 int main(int argc, char * argv) {
 	char s[] = "Hello, \0            ";
 	char t[] = "guy!";
@@ -44,4 +69,16 @@ int main(int argc, char * argv) {
 	if (!strend(u, v))
 		printf("'%s' does not end with '%s'\n", u, v);
 
+	char w[] = "I went in the store.";
+	char x[] = "to a place.";
+	strncpy(w + 7, x, 2);
+
+	printf("%s\n", w);
+
+	*(u + 28) = '\0';
+	strncat(u, v, 14);
+	printf("%s\n", u);
+	
+	if (strncmp("Apple", "Pear", 2) == ('p' - 'e'))
+		printf("Strncmp!\n");
 }
