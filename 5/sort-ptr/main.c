@@ -7,6 +7,8 @@
 
 char *lineptr[MAXLINES];
 
+int (*cmp_fn)(void *, void *);
+
 int get_line(char *s, int maxlen)
 {
 	int c;
@@ -94,6 +96,11 @@ int numcmp(char *s1, char *s2)
 		return 0;
 }
 
+int rev(void *p1, void *p2)
+{
+	return -1 * cmp_fn(p1, p2);
+}
+
 void swap(void *v[], int i, int j)
 {
 	void *temp;
@@ -121,9 +128,9 @@ void jsort(void *v[], int left, int right,
 	jsort(v, last+1, right, comp);
 }
 
-int main(int argc, char *argv) {
+int main(int argc, char *argv[]) {
 	int nlines;
-	int numeric, reverse;
+	int numeric = 0, reverse = 0;
 	char heap[MAXHEAP];
 
 	if (argc > 1 && strcmp(argv[1], "-n") == 0)
@@ -138,9 +145,9 @@ int main(int argc, char *argv) {
 	if (argc > 2 && strcmp(argv[2], "-r") == 0)
 		reverse = 1;
 
+	cmp_fn = (numeric ? numcmp : strcmp);
 	if ((nlines = readlines(lineptr, MAXLINES, heap, MAXHEAP)) >= 0) {
-		jsort((void **) lineptr, 0, nlines-1,
-			(int (*)(void *, void *)) (numeric ? numcmp : strcmp));
+		jsort((void **) lineptr, 0, nlines-1, reverse ? rev : cmp_fn);
 		writelines(lineptr, nlines);
 		return 0;
 	} else {
