@@ -37,6 +37,21 @@ int strcmp(char *s, char *t)
 	return v;
 }
 
+char tolower(char c) 
+{
+	if (c >= 'A' && c <= 'Z')
+		c = (c - 'A') + 'a';
+
+	return c;
+}
+
+int strcmpi(char *s, char *t)
+{
+	int v;
+	while ((v = (tolower(*s++) - tolower(*t++))) == 0 && *s != '\0' && *t != '\0');
+	return v;
+}
+
 int readlines(char *lineptr[], int maxlines, char *heap, int maxheap) {
 	int len, nlines;
 	char *heapstart = heap;
@@ -131,7 +146,7 @@ void jsort(void *v[], int left, int right,
 int main(int argc, char *argv[]) {
 	int i;
 	int nlines;
-	int numeric = 0, reverse = 0;
+	int numeric = 0, reverse = 0, fold = 0;
 	char heap[MAXHEAP];
 
 	for (i = 1; i < argc; i++)
@@ -143,11 +158,26 @@ int main(int argc, char *argv[]) {
 				case 'r':
 					reverse = 1;
 					break;
+				case 'f':
+					fold = 1;
+					break;
 				default:
 					printf("Bad option: '%s'\n", argv[i]);
 			}
 
-	cmp_fn = (numeric ? numcmp : strcmp);
+	if (fold && reverse)
+	{
+		printf("Can't use -f with -r\n");
+		return 1;
+	}
+
+	if (numeric)
+		cmp_fn = numcmp;
+	else if (fold)
+		cmp_fn = strcmpi;
+	else
+		cmp_fn = strcmp;
+
 	if ((nlines = readlines(lineptr, MAXLINES, heap, MAXHEAP)) >= 0) {
 		jsort((void **) lineptr, 0, nlines-1,
 				(int (*)(void*, void*)) (reverse ? rev : cmp_fn));
