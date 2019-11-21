@@ -37,6 +37,43 @@ int strcmp(char *s, char *t)
 	return v;
 }
 
+int isletter(char c)
+{
+	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
+
+int isnum(char c)
+{
+	return c >= '0' && c <= '9';
+}
+
+int isblank(char c)
+{
+	return c == ' ';
+}
+
+int dircmp(char *s, char *t)
+{
+	int v = 0;
+	while (*s != '\0' && *t != '\0')
+	{
+		if(!(isnum(*s) || isblank(*s) || isletter(*s)))
+		{
+			s++;
+			continue;
+		}
+		if(!(isnum(*t) || isblank(*t) || isletter(*t)))
+		{
+			t++;
+			continue;
+		}
+		if ((v = *s++ - *t++) != 0)
+			break;
+	}
+	return v;
+}
+
+
 char tolower(char c) 
 {
 	if (c >= 'A' && c <= 'Z')
@@ -44,6 +81,29 @@ char tolower(char c)
 
 	return c;
 }
+
+int dir_char(char c)
+{
+	return isnum(c) || c == ' ' || isletter(c);
+}
+
+int dircmpi(char *s, char *t)
+{
+	int v = 0;
+	while (*s != '\0' && *t != '\0')
+	{
+		while(!dir_char(*s))
+			s++;
+
+		while(!dir_char(*t))
+			t++;
+
+		if ((v = tolower(*s++) - tolower(*t++)) != 0)
+			break;
+	}
+	return v;
+}
+
 
 int strcmpi(char *s, char *t)
 {
@@ -86,6 +146,11 @@ int strlen(char *s)
 	return p - s;
 }
 
+int isspace(char c)
+{
+	return c == ' ' || c == '\n' || c == '\t';
+}
+
 int reverse(char s[]) {
 	int i, j;
 	char c;
@@ -110,6 +175,7 @@ int numcmp(char *s1, char *s2)
 	else
 		return 0;
 }
+
 
 int rev(void *p1, void *p2)
 {
@@ -143,10 +209,11 @@ void jsort(void *v[], int left, int right,
 	jsort(v, last+1, right, comp);
 }
 
+
 int main(int argc, char *argv[]) {
 	int i;
 	int nlines;
-	int numeric = 0, reverse = 0, fold = 0;
+	int numeric = 0, reverse = 0, fold = 0, directory;
 	char heap[MAXHEAP];
 
 	for (i = 1; i < argc; i++)
@@ -161,20 +228,27 @@ int main(int argc, char *argv[]) {
 				case 'f':
 					fold = 1;
 					break;
+				case 'd':
+					directory = 1;
+					break;
 				default:
 					printf("Bad option: '%s'\n", argv[i]);
 			}
 
-	if (fold && reverse)
+	if (fold && numeric)
 	{
-		printf("Can't use -f with -r\n");
+		printf("Can't use -f with -n\n");
 		return 1;
 	}
 
 	if (numeric)
 		cmp_fn = numcmp;
+	else if (directory && fold)
+		cmp_fn = dircmpi;
 	else if (fold)
 		cmp_fn = strcmpi;
+	else if (directory)
+		cmp_fn = dircmp;
 	else
 		cmp_fn = strcmp;
 
