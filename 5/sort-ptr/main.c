@@ -13,6 +13,7 @@ int get_line(char *s, int maxlen)
 {
 	int c;
 	char *b = s;
+
 	while (maxlen-- > 0 && (c = getchar()) != EOF && c != '\n')
 		*s++ = c;
 
@@ -45,14 +46,13 @@ int readlines(char *lineptr[], int maxlines, char *heap, int maxheap) {
 	while ((len = get_line(line, MAXLEN)) > 0)
 		if (nlines >= maxlines /* || heap < (heap + maxheap) */ )
 		{
-			printf("Heap - Start: %d\n", heap - heapstart);
-			printf("Nlines: %d\n", nlines);
 			return -1;
 		}
 		else {
 			line[len - 1] = '\0';
-			strcpy(heap += len, line);
+			strcpy(heap, line);
 			lineptr[nlines++] = heap;
+			heap += len;
 		}
 	return nlines;
 }
@@ -129,25 +129,28 @@ void jsort(void *v[], int left, int right,
 }
 
 int main(int argc, char *argv[]) {
+	int i;
 	int nlines;
 	int numeric = 0, reverse = 0;
 	char heap[MAXHEAP];
 
-	if (argc > 1 && strcmp(argv[1], "-n") == 0)
-		numeric = 1;
-
-	if (argc > 1 && strcmp(argv[1], "-r") == 0)
-		reverse = 1;
-
-	if (argc > 2 && strcmp(argv[2], "-n") == 0)
-		numeric = 1;
-
-	if (argc > 2 && strcmp(argv[2], "-r") == 0)
-		reverse = 1;
+	for (i = 1; i < argc; i++)
+		if (*argv[i] == '-')
+			switch (*(argv[i] + 1)) {
+				case 'n':
+					numeric = 1;
+					break;
+				case 'r':
+					reverse = 1;
+					break;
+				default:
+					printf("Bad option: '%s'\n", argv[i]);
+			}
 
 	cmp_fn = (numeric ? numcmp : strcmp);
 	if ((nlines = readlines(lineptr, MAXLINES, heap, MAXHEAP)) >= 0) {
-		jsort((void **) lineptr, 0, nlines-1, reverse ? rev : cmp_fn);
+		jsort((void **) lineptr, 0, nlines-1,
+				(int (*)(void*, void*)) (reverse ? rev : cmp_fn));
 		writelines(lineptr, nlines);
 		return 0;
 	} else {
