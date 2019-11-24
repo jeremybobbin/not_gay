@@ -4,7 +4,7 @@
 
 #define MAXTOKEN 100
 
-enum { NAME, PARENS, BRACKETS };
+enum { NAME, PARENS, BRACKETS, QUALIFIER };
 
 int gettoken(void);
 int tokentype;
@@ -87,6 +87,12 @@ int gettoken()
 			*p++ = c;
 		*p = '\0';
 		ungetch(c);
+
+		if (strcmp(p, "static") == 0 ||
+				strcmp(p, "const") == 0 ||
+				strcmp(p, "extern") == 0 ||
+				strcmp(p, "register") == 0)
+			return tokentype = QUALIFIER;
 		return tokentype = NAME;
 	} else
 		return tokentype = c;
