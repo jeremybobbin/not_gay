@@ -16,6 +16,7 @@ char out[1000];
 void dirdcl(void);
 void dcl(void);
 void dtype(void);
+void paramls(void);
 
 int ch = -1;
 int getch()
@@ -52,9 +53,14 @@ void dirdcl(void)
 		strcpy(name, token);
 	else
 		printf("error: expected name or (dcl)\n");
-	while ((type=gettoken()) == PARENS || type == BRACKETS)
+	while ((type=gettoken()) == PARENS || type == BRACKETS || type == '(')
 		if (type == PARENS)
 			strcat(out, " function returning");
+		else if (type == '(') {
+			strcat(out, " function");
+			paramls();
+			strcat(out, " returning");
+		}
 		else {
 			strcat(out, " array");
 			strcat(out, token);
@@ -64,12 +70,28 @@ void dirdcl(void)
 
 void dtype(void) {
 	while (tokentype == QUALIFIER) {
-		strcat(datatype, token);
 		strcat(datatype, " ");
+		strcat(datatype, token);
 		gettoken();
 	}
+	strcat(datatype, " ");
 	strcat(datatype, token);
-	dcl();
+}
+
+void paramls(void)
+{
+	int type;
+	strcat(out, " taking");
+	while ((type = gettoken()) != EOF && type != ')') {
+		while (tokentype == QUALIFIER) {
+			strcat(out, " ");
+			strcat(out, token);
+			gettoken();
+		}
+		strcat(out, " ");
+		strcat(out, token);
+		strcat(out, ", ");
+	}
 }
 
 int gettoken()
@@ -116,7 +138,9 @@ int main(int argc, char *argv)
 	while (gettoken() != EOF) {
 		out[0] = '\0';
 		dtype();
+		dcl();
 		if (tokentype != '\n') {
+			printf("Token: %s\n", token);
 			printf("syntax error\n");
 			while (getch() != '\n');
 		}
