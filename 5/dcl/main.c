@@ -88,11 +88,12 @@ int gettoken()
 		*p = '\0';
 		ungetch(c);
 
-		if (strcmp(p, "static") == 0 ||
-				strcmp(p, "const") == 0 ||
-				strcmp(p, "extern") == 0 ||
-				strcmp(p, "register") == 0)
+		if (strcmp(token, "static") == 0 ||
+				strcmp(token, "const") == 0 ||
+				strcmp(token, "extern") == 0 ||
+				strcmp(token, "register") == 0)
 			return tokentype = QUALIFIER;
+
 		return tokentype = NAME;
 	} else
 		return tokentype = c;
@@ -102,7 +103,12 @@ int main(int argc, char *argv)
 {
 	char *t;
 	while (gettoken() != EOF) {
-		strcpy(datatype, token);
+		while (tokentype == QUALIFIER) {
+			strcat(datatype, token);
+			strcat(datatype, " ");
+			gettoken();
+		}
+		strcat(datatype, token);
 		out[0] = '\0';
 		dcl();
 		if (tokentype != '\n') {
@@ -110,6 +116,7 @@ int main(int argc, char *argv)
 			while (getch() != '\n');
 		}
 		printf("%s: %s %s\n", name, out, datatype);
+		datatype[0] = '\0';
 	}
 	return 0;
 }
