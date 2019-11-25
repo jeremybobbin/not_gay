@@ -15,6 +15,7 @@ char out[1000];
 
 void dirdcl(void);
 void dcl(void);
+void dtype(void);
 
 int ch = -1;
 int getch()
@@ -61,6 +62,16 @@ void dirdcl(void)
 		}
 }
 
+void dtype(void) {
+	while (tokentype == QUALIFIER) {
+		strcat(datatype, token);
+		strcat(datatype, " ");
+		gettoken();
+	}
+	strcat(datatype, token);
+	dcl();
+}
+
 int gettoken()
 {
 	int c, getch(void);
@@ -103,14 +114,8 @@ int main(int argc, char *argv)
 {
 	char *t;
 	while (gettoken() != EOF) {
-		while (tokentype == QUALIFIER) {
-			strcat(datatype, token);
-			strcat(datatype, " ");
-			gettoken();
-		}
-		strcat(datatype, token);
 		out[0] = '\0';
-		dcl();
+		dtype();
 		if (tokentype != '\n') {
 			printf("syntax error\n");
 			while (getch() != '\n');
