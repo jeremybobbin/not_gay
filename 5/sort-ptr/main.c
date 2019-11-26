@@ -182,6 +182,20 @@ int rev(void *p1, void *p2)
 	return -1 * cmp_fn(p1, p2);
 }
 
+int col;
+int colcmp(char *s, char *t)
+{
+	int n;
+	for (n = col; n > 0 && *s != '\0'; n--)
+		while ((*s++) != '\t')
+
+	for (n = col; n > 0 && *s != '\0'; n--)
+		while ((*s++) != '\t')
+
+	while ((v = (tolower(*s++) - tolower(*t++))) == 0 && *s != '\0' && *t != '\0');
+	return v;
+}
+
 void swap(void *v[], int i, int j)
 {
 	void *temp;
