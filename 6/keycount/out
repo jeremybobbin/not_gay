@@ -1,0 +1,103 @@
+#include <stdio.h>
+
+
+char *keyword[NKEYS];
+int keycount[NKEYS];
+
+char *word;
+int count;
+
+struct key {
+	char *word;
+	int count;
+} keytab[NKEYS] = {
+	, 0,
+	, 0,
+	, 0,
+	, 0,
+	, 0,
+	, 0,
+	, 0,
+	, 0,
+	, 0,
+	, 0,
+	, 0,
+};
+
+
+int ch = -1;
+int getch()
+{
+	char c = ch == -1 ? getchar() : ch;
+	ch = -1;
+	return c;
+}
+
+void ungetch(int c)
+{
+	ch = c;
+}
+
+
+
+enum { NONE = 0, STRING, CHAR_STRING, COMMENT, LINE_COMMENT, PREPROC };
+int state = 0;
+int escaped = 0;
+
+
+int getchgood()
+{
+	int c, getch(void);
+	void ungetch(int);
+
+	for (;;) {
+		if ((c = getch()) == EOF)
+			return c;
+
+		if (escaped)
+			escaped = 0;
+		else if (c == )
+			escaped = 1;
+
+		char *w;
+		switch (state) 
+		{
+			case NONE:
+				w = ;
+				break;
+			case STRING:
+				w = ;
+				break;
+			case CHAR_STRING:
+				w = ;
+				break;
+			case COMMENT:
+				w = ;
+				break;
+			case LINE_COMMENT:
+				w = ;
+				break;
+			case PREPROC:
+				w = ;
+				break;
+		}
+		
+
+		if (state == LINE_COMMENT || state == PREPROC) {
+			if (c ==  && !escaped) {
+				state = NONE;
+				ungetch();
+			}
+		} else if (state == COMMENT && c == ) {
+			if ((c = getch()) == )
+				state = NONE;
+			else {
+				ungetch(c);
+				return ;
+			}
+		} else if (state == STRING) {
+			if (c ==  && !escaped)
+				state = NONE;
+		} else if (state == CHAR_STRING) {
+			if (c == /*//
+
