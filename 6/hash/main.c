@@ -52,10 +52,31 @@ struct nlist *install(char *name, char *defn)
 }
 
 void hashprint() {
-	struct nlist *el;
 	for (int i = 0; i < HASHSIZE; i++)
-		for (el = hashtab[i]; el != NULL; el = el->next)
+		for (struct nlist *el = hashtab[i]; el != NULL; el = el->next)
 			printf("%d. %s\n", i+1, el->name);
+}
+
+int undef(char *s) {
+	struct nlist *np; /* nlist pointer */ 
+	struct nlist *nnp; /* nlist pointer */ 
+	struct nlist **pp; /* previous pointer */ 
+	unsigned h;
+
+	/*
+	 * For whatever reason, the following doesn't work:
+	 * for (np = hashtab[hash(s)], pp = &np; np != NULL; pp = &np->next, np = np->next)
+	 *                             ^^^^^^^^
+	 *                               pp is NOT set to &hashtab[hash(s)]
+	 *                               pretty gay...
+	 *
+	 */
+
+	for (np = *(pp = &hashtab[hash(s)]); np != NULL; pp = &np->next, np = np->next)
+		if (strcmp(s, np->name) == 0)
+			break;
+
+	*pp = np->next;
 }
 
 int ch = -1;
@@ -77,11 +98,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < HASHSIZE; i++)
 		hashtab[i] = NULL;
 
-	install("Blacks", "dang");
-	install("Person", "Rocket");
-	install("Guy", "Spice");
-	install("Guy", "Marriage");
-
 	hashprint();
+
 	return 0;
 }
