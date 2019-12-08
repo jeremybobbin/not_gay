@@ -65,10 +65,23 @@ int _flushbuf(int c, FILE *fp)
 	fp->cnt = bufsize;
 	fp->ptr = fp->base;
 
-	if (write(fp->fd, &c, 1) != 1)
-		return -1;
+	if (c != -1)
+		if (write(fp->fd, &c, 1) != 1)
+			return -1;
 
 
+	return 0;
+}
+
+int fflush(FILE *fp) {
+	return _flushbuf(-1, fp);
+}
+
+int fclose(FILE *fp) {
+	int ret;
+	if (ret = fflush(fp)) 
+		return ret; /* return if non-zero*/
+	fp->flag = 0;
 	return 0;
 }
 
@@ -131,8 +144,11 @@ int main(int argc, char *argv[])
 	int i;
 	FILE *iop, *ofp;
 	for (i = 1; i < argc; i++)
-		if ((iop = fopen(argv[i], "r")) != NULL)
+		if ((iop = fopen(argv[i], "r")) != NULL) {
 			cat_by_char(iop, &_iob[stdout]);
+			fclose(iop);
+			fflush(&_iob[stdout]);
+		}
 		else exit(1);
 
 	return 0;
