@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include <stdlib.h>
+#include <string.h>
 #include "fileops.h"
 
 #define PERMS 0666
@@ -37,6 +38,40 @@ int _fillbuf(FILE *fp)
 	return (unsigned char) *fp->ptr++;
 }
 
+int _flushbuf(int c, FILE *fp)
+{
+	int bufsize, written;
+	char *end;
+	int i;
+	if ((fp->flag&(_WRITE|_EOF|_ERR)) != _WRITE)
+		return EOF;
+
+	bufsize = (fp->flag & _UNBUF) ? 1 : BUFSIZ;
+
+	if (fp->base == NULL) /* there is no buffer */ {
+		if ((fp->base =  (char *) malloc(bufsize)) == NULL)
+			return EOF; /* can't alloc */
+
+		fp->ptr = fp->base;
+		fp->cnt = bufsize;
+	}
+
+	end = fp->ptr;
+	fp->ptr = fp->base;
+
+	while (fp->ptr < end)
+		fp->ptr += write(fp->fd, fp->ptr, end - fp->ptr);
+
+	fp->cnt = bufsize;
+	fp->ptr = fp->base;
+
+	if (write(fp->fd, &c, 1) != 1)
+		return -1;
+
+
+	return 0;
+}
+
 FILE _iob[OPEN_MAX] = {
 	{ 0, (char *) 0, (char *) 0, _READ,          0 },
 	{ 0, (char *) 0, (char *) 0, _WRITE,         1 },
@@ -51,7 +86,7 @@ FILE *fopen(char *name, char *mode)
 	if (*mode != 'r' && *mode != 'w' && *mode != 'a')
 		return NULL;
 	for (fp = _iob; fp < _iob + OPEN_MAX; fp++)
-		if ((fp-> flag & (_READ | _WRITE)) == 0)
+		if ((fp->flag & (_READ | _WRITE)) == 0)
 			break;
 
 	if (fp >= _iob + OPEN_MAX)
@@ -83,29 +118,26 @@ double get_time()
     return t.tv_sec + t.tv_usec*1e-6;
 }
 
-int cat_by_char(FILE *ifp)
+int cat_by_char(FILE *ifp, FILE *ofp)
 {
 	int c, n;
 	while ((c = getc(ifp)) != EOF)
-		n += c;
+		putc(c, ofp);
 }
 
 //#define MAX_ITER 1000
 int main(int argc, char *argv[])
 {
 	int i;
-	FILE *iop;
+	FILE *iop, *ofp;
 	for (i = 1; i < argc; i++)
 		if ((iop = fopen(argv[i], "r")) != NULL)
-			cat_by_char(iop);
+			cat_by_char(iop, &_iob[stdout]);
 		else exit(1);
-	//t = get_time();
-	//printf("Cat by char: %lf\n", get_time() - t);
 
-	//for (i = 0; i < MAX_ITER; i++)
-	//	isupper_fn(i);
-
+	return 0;
 
 
 }
+
 
