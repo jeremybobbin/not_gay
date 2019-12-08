@@ -48,22 +48,27 @@ int _flushbuf(int c, FILE *fp)
 
 	bufsize = (fp->flag & _UNBUF) ? 1 : BUFSIZ;
 
-	if (fp->base == NULL) /* there is no buffer */ {
-		if ((fp->base =  (char *) malloc(bufsize)) == NULL)
-			return EOF; /* can't alloc */
+	if  (bufsize > 1)
+	{
+		if (fp->base == NULL) /* there is no buffer */ {
+			if ((fp->base =  (char *) malloc(bufsize)) == NULL)
+				return EOF; /* can't alloc */
 
-		fp->ptr = fp->base;
-		fp->cnt = bufsize;
+			fp->ptr = fp->base;
+			fp->cnt = bufsize;
+		}
+
+		if (fp->ptr > fp->base) {
+			end = fp->ptr;
+			fp->ptr = fp->base;
+
+			while (fp->ptr < end)
+				fp->ptr += write(fp->fd, fp->ptr, end - fp->ptr);
+
+			fp->cnt = bufsize;
+			fp->ptr = fp->base;
+		}
 	}
-
-	end = fp->ptr;
-	fp->ptr = fp->base;
-
-	while (fp->ptr < end)
-		fp->ptr += write(fp->fd, fp->ptr, end - fp->ptr);
-
-	fp->cnt = bufsize;
-	fp->ptr = fp->base;
 
 	if (c != -1)
 		if (write(fp->fd, &c, 1) != 1)
@@ -123,18 +128,29 @@ FILE *fopen(char *name, char *mode)
 	return fp;
 }
 
-double get_time()
-{
-    struct timeval t;
-    struct timezone tzp;
-    gettimeofday(&t, &tzp);
-    return t.tv_sec + t.tv_usec*1e-6;
+int fseek(FILE *fp, long offset, int whence) {
+	int pos, bufsize;
+
+	if (fp->flag & _READ)
+		fp->cnt = 0;
+	else if (fp->flag & _WRITE)
+		fflush(fp);
+
+	return lseek(fp->fd, offset, whence);
 }
 
-int cat_by_char(FILE *ifp, FILE *ofp)
+double get_time()
 {
-	int c, n;
-	while ((c = getc(ifp)) != EOF)
+	struct timeval t;
+	struct timezone tzp;
+	gettimeofday(&t, &tzp);
+	return t.tv_sec + t.tv_usec*1e-6;
+}
+
+int catn(FILE *ifp, FILE *ofp, int n)
+{
+	int c;
+	while ((c = getc(ifp)) != EOF && n--)
 		putc(c, ofp);
 }
 
@@ -142,12 +158,13 @@ int cat_by_char(FILE *ifp, FILE *ofp)
 int main(int argc, char *argv[])
 {
 	int i;
-	FILE *iop, *ofp;
+	FILE *fp, *ofp;
 	for (i = 1; i < argc; i++)
-		if ((iop = fopen(argv[i], "r")) != NULL) {
-			cat_by_char(iop, &_iob[stdout]);
-			fclose(iop);
-			fflush(&_iob[stdout]);
+		if ((fp = fopen(argv[i], "r")) != NULL) {
+			catn(fp, &_iob[stdout], 5);
+			fseek(fp, -5, 2);
+			catn(fp, &_iob[stdout], 100000);
+			fclose(&_iob[stdout]);
 		}
 		else exit(1);
 
