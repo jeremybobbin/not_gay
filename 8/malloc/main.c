@@ -49,6 +49,10 @@ int main(int argc, char *argv[])
 		else
 			putstr("DANG\n");
 
+	for (int i = sizeof(Header); i > 0; i--)
+		putstr("1");
+
+	putstr("\n");
 	return 0;
 }
 
