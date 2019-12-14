@@ -37,6 +37,19 @@ void *malloc(unsigned nbytes)
 	}
 }
 
+void *calloc(int n, unsigned nbytes)
+{
+	char *head;
+	int size = n*nbytes;
+	if ((head = malloc(size)) == NULL)
+		return NULL;
+
+	while (--size)
+		*(head+size) = 0;
+
+	return (void *)head;
+}
+
 void free(void *ap)
 {
 	Header *bp, *p;

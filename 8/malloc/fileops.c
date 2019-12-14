@@ -3,6 +3,7 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 #include "fileops.h"
+#include "malloc.h"
 
 #define PERMS 0666
 

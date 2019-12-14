@@ -13,6 +13,7 @@ typedef union header Header;
 #define NEXT(x) ((x)->s.ptr)
 #define SIZE(x) ((x)->s.size)
 void *malloc(unsigned);
+void *calloc(int, unsigned);
 
 #define NALLOC 1024
 static Header *morecore(unsigned);
